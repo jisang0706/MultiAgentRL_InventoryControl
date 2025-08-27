@@ -131,7 +131,7 @@ def plots2(file_paths_list, window_size=10):
             ax.fill_between(iterations, moving_avg - moving_std, moving_avg + moving_std, color=color, alpha=0.2)
 
         # Set labels and title
-        ax.set_xlabel('Iteration', fontsize=16)
+        ax.set_xlabel('Training Epochs', fontsize=16)
         ax.set_ylabel('Reward', fontsize=16)
         ax.legend(frameon=False, fontsize=14)
         
@@ -148,7 +148,7 @@ def plots2(file_paths_list, window_size=10):
 
 def plots(file_paths_list):
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
-    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Noisy P-GCN-MAPPO', 'N/A']
+    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Reg-P-GCN-MAPPO', 'N/A']
     
         
     for i, file_paths in enumerate(file_paths_list):
@@ -160,9 +160,10 @@ def plots(file_paths_list):
             # Uncomment to add shaded area for std deviation
             # ax.fill_between(iterations, avg_reward - std_reward, avg_reward + std_reward, color=color, alpha=0.2)
 
-        ax.set_xlabel('Iteration', fontsize=16)
-        ax.set_ylabel('Reward', fontsize=16)
-        ax.legend(frameon=False, fontsize=16, loc='lower right')
+        ax.set_xlabel('Training Epochs', fontsize=18)
+        ax.set_ylabel('Reward', fontsize=18)
+        ax.tick_params(axis='both', labelsize=16)
+        ax.legend(frameon=False, fontsize=18, loc='lower right')
         #ax.spines['right'].set_visible(False)
         #ax.spines['top'].set_visible(False)
         names = ['train6.png', 'train12.png', 'train18.png', 'train24.png']
@@ -170,26 +171,28 @@ def plots(file_paths_list):
             file_name = f'figures/train_{i + 1}'
             fig.savefig(f'{file_name}.png', dpi=1100)
             fig.savefig(f'{file_name}.pdf', dpi=1100)
+            plt.show()
 
 
 file_paths_list = [file_paths6, file_paths12, file_paths18, file_paths24]
 
-plots(file_paths_list)
+#plots(file_paths_list)
 
 file_paths_list1 = [file_paths6, file_paths12, file_paths181, file_paths241]
 def error_bars_method(file_paths_list, number_agents_list):
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
     markers = ['o', 's', 'D', '^']
-    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Noisy P-GCN-MAPPO']
-    fig, ax = plt.subplots(figsize=(18, 8))
+    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Reg-P-GCN-MAPPO']
+    fig, ax = plt.subplots(figsize=(18, 8), layout='constrained')
     
     for i, (file_paths, num_agents, color, marker) in enumerate(zip(file_paths_list, number_agents_list, colors, markers)):
         highest_avg_reward_path, mean_training_times, stds_training_times, all_avg_rewards, std_reward = training_figures(file_paths, 100, [1,1,1,1,1])
         ax.errorbar(labels, mean_training_times, yerr=stds_training_times, fmt=marker, color=color, capsize=5, label=f'{num_agents} Agents')
 
-    ax.legend(frameon=False, fontsize=14)
-    ax.set_ylabel('Mean Training Time Per Iteration (s)', fontsize=14)
-    ax.set_xlabel('Methods', fontsize=14)
+    ax.legend(frameon=False, fontsize=18)
+    ax.set_ylabel('Mean Training Time Per Epoch (s)', fontsize=18)
+    ax.set_xlabel('Methods', fontsize=18)
+    ax.tick_params(axis='both', labelsize=16)
     #ax.spines['right'].set_visible(False)
     #ax.spines['top'].set_visible(False)
     plt.tight_layout()
@@ -197,8 +200,34 @@ def error_bars_method(file_paths_list, number_agents_list):
     fig.savefig('figures/error_bars_compile.pdf', bbox_inches='tight')  # Save as PDF with tight bounding box
     plt.show()
 
-number_agents_list = [6, 12, 18, 24]
 
+def bar_chart_with_error_bars(file_paths_list, number_agents_list):
+    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
+    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Reg-P-GCN-MAPPO']
+    bar_width = 0.2
+    x = np.arange(len(labels))
+    
+    fig, ax = plt.subplots(figsize=(18, 8), layout='constrained')
+    
+    for i, (file_paths, num_agents, color) in enumerate(zip(file_paths_list, number_agents_list, colors)):
+        highest_avg_reward_path, mean_training_times, stds_training_times, all_avg_rewards, std_reward = training_figures(file_paths, 100, [1,1,1,1,1])
+        ax.bar(x + i * bar_width, mean_training_times, yerr=stds_training_times, 
+               capsize=5, color=color, width=bar_width, label=f'{num_agents} Agents', alpha=0.8)
+    
+    ax.legend(frameon=False, fontsize=18)
+    ax.set_ylabel('Mean Training Time Per Epoch (s)', fontsize=18)
+    ax.set_xlabel('Methods', fontsize=18)
+    ax.set_xticks(x + bar_width * (len(number_agents_list) / 2 - 0.5))
+    ax.set_xticklabels(labels, fontsize=16)
+    ax.tick_params(axis='both', labelsize=16)
+    
+    plt.tight_layout()
+    fig.savefig('figures/bar_chart_error_bars.png', dpi=1100)
+    fig.savefig('figures/bar_chart_error_bars.pdf', bbox_inches='tight')
+    plt.show()
+
+number_agents_list = [6, 12, 18, 24]
+bar_chart_with_error_bars(file_paths_list1, number_agents_list)
 
 def error_bars_method1(file_paths_list):
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']

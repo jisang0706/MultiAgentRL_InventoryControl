@@ -80,7 +80,8 @@ network = create_network(connections)
 echelons = {node: get_stage(node, network) for node in range(len(network))}
 agent_ids = [f"{echelons[node]}_{node:02d}" for node in range(len(network))]
 
-ng1 =  r"c:\Users\nk3118\ray_results\PPO_MultiAgentInvManagementDiv_2024-05-19_23-11-22vjup3rv8\checkpoint_000060"
+#ng1 =  r"c:\Users\nk3118\ray_results\PPO_MultiAgentInvManagementDiv_2024-05-19_23-11-22vjup3rv8\checkpoint_000060"
+ng1 = "/Users/nikikotecha/Documents/PhD/sS/Checkpoint/env21698666231/checkpoint/checkpoint_000012"
 ng1p = Algorithm.from_checkpoint(ng1,
                                  policy_ids= agent_ids,
                                 policy_mapping_fn= lambda agent_id, episode, worker, **kwargs: (

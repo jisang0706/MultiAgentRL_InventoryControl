@@ -1,3 +1,4 @@
+from tkinter import font
 from venv import create
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -7,62 +8,63 @@ from torch import layout
 
 plt.rcParams['text.usetex'] = True
 
-ippo18 = r"ng1_18.json"
-mappo18 = r"ng2_18.json" 
-gmappo18 = r"g1_18.json" 
-g218 = r"g2_18.json" 
-g218noise = r"g23_18.json"
+ippo18 = r"data/ng1_18.json"
+mappo18 = r"data/ng2_18.json" 
+gmappo18 = r"data/g1_18.json" 
+g218 = r"data/g2_18.json" 
+g218noise = r"data/g23_18.json"
 
-ng2_disrupt =r"g2_1_18.json"
-g2_disrupt =r"g23_18.json"
+ng2_disrupt =r"data/g2_1_18.json"
+g2_disrupt =r"data/g23_18.json"
 
 
 file_paths18 = [ippo18, mappo18, gmappo18, g218, g218noise]
 #file_paths18 = [ippo18, mappo18, g218noise]
 
-ippo12 = r"ippo_12_1.json"
-mappo12 = r"mappo_12_1.json"
-gmappo12 = r"gmappo_12_1.json"
-g212 =  r"g2_12_gnoise0.json"
-g212noise =  r"g2_12_gnoise2.json"
+ippo12 = r"data/ippo_12_1.json"
+mappo12 = r"data/mappo_12_1.json"
+gmappo12 = r"data/gmappo_12_1.json"
+g212 =  r"data/g2_12_gnoise0.json"
+g212noise =  r"data/g2_12_gnoise2.json"
 file_paths12 = [ippo12, mappo12, gmappo12, g212, g212noise]
 
-ippo24 = r"ippo_24.json"
-mappo24 = r"mappo_24.json"
-gmappo24 = r"gmappo_24.json"
-g224 =  r"g2_24_gnoise0.json"
-g224noise =  r"g2_24_gnoise2.json"
+ippo24 = r"data/ippo_24.json"
+mappo24 = r"data/mappo_24.json"
+gmappo24 = r"data/gmappo_24.json"
+g224 =  r"data/g2_24_gnoise0.json"
+g224noise =  r"data/g2_24_gnoise2.json"
 file_paths24 = [ippo24, mappo24, gmappo24, g224, g224noise]
 
-ippo32 = r"ippo_32.json"
-mappo32 = r"mappo_32.json"
-gmappo32 = r"gmappo_32.json"
-g232 =  r"g2_32_noise0.json"
-g232noise =  r"g2_32_noise2.json"
+ippo32 = r"data/ippo_32.json"
+mappo32 = r"data/mappo_32.json"
+gmappo32 = r"data/gmappo_32.json"
+g232 =  r"data/g2_32_noise0.json"
+g232noise =  r"data/g2_32_noise2.json"
 file_paths32 = [ippo32, mappo32, gmappo32, g232, g232noise]
 
-g2_noise00 = r"g2_18_nonoise.json"
-g2_noise01 = r"g2_18_noise0.11.json"
-g2_noise02 = r"g2_18_noise0.222.json"
-g2_noise05 =r"g2_18_noise0.55.json"
-g2_noise075 = r"g2_18_noise075.json"
-g2_noise10 = r"g2_18_noise1.00.json"
-g2_noise20 = r"g2_18_noise20.json"
+g2_noise00 = r"data/g2_18_nonoise.json"
+g2_noise01 = r"data/g2_18_noise0.11.json"
+g2_noise02 = r"data/g2_18_noise0.222.json"
+g2_noise05 =r"data/g2_18_noise0.55.json"
+g2_noise075 = r"data/g2_18_noise075.json"
+g2_noise10 = r"data/g2_18_noise1.00.json"
+g2_noise20 = r"data/g2_18_noise20.json"
 
 files_noise = [g2_noise00, g2_noise01, g2_noise02, g2_noise05, g2_noise10, g2_noise20]
 
-ippo6 = r"ippo_6.json"
-mapppo6 = r"mappo_6.json"
-gmappo6 = r"gmappo_6.json"
-g2_6 = r"g2_6.json"
-g2_6noise = r"g2_6_noise02.json"
+ippo6 = r"data/ippo_6.json"
+mapppo6 = r"data/mappo_6.json"
+gmappo6 = r"data/gmappo_6.json"
+g2_6 = r"data/g2_6.json"
+g2_6noise = r"data/g2_6_noise02.json"
 
 file_paths6 = [ippo6, mapppo6, gmappo6, g2_6, g2_6noise]
 
 def process_all_nodes_data(profits_dict, ax):
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown']
-    labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Noisy P-GCN-MAPPO', '2.0']
-    
+    #labels = ['IPPO', 'MAPPO', 'G-MAPPO', 'P-GCN-MAPPO', 'Reg-P-GCN-MAPPO', '2.0']
+    labels = ['0.0', '0.1', '0.2', '0.5', '1.0', '2.0']
+
     for i, (key, av_profits) in enumerate(profits_dict.items()):
         average_profit_list = np.mean(av_profits, axis=0)
         std_profit_list = np.std(av_profits, axis=0)
@@ -72,10 +74,11 @@ def process_all_nodes_data(profits_dict, ax):
         ax.plot(period, cumulative_profit_list, label=labels[i], color=colors[i], linestyle='solid')
         ax.fill_between(period, cumulative_profit_list + std_profit_list, cumulative_profit_list - std_profit_list, color=colors[i], alpha=0.2, linewidth=0)
     
-    ax.set_xlabel('Period')
-    ax.set_ylabel('Average Cumulative Profit')
+    ax.set_xlabel('Period', fontsize=18)
+    ax.set_ylabel('Average Cumulative Profit', fontsize=18)
+    ax.tick_params(axis='both', labelsize=16)
     ax.set_xlim(0, 50)
-    ax.legend(frameon=False, fontsize=14)
+    ax.legend(frameon=False, fontsize=18)
     
 
 
@@ -122,6 +125,7 @@ def create_single_plot_for_file_paths(file_paths, label):
 file_paths_list = [file_paths6, file_paths12, file_paths18, file_paths24]
 labels = ['figures/execute_6.png', 'figures/execute_12.png', 'figures/execute_18.png', 'figures/execute_24.png']
 labels = ['figures/execute_6.pdf', 'figures/execute_12.pdf', 'figures/execute_18.pdf', 'figures/execute_24.pdf']
-
+file_paths_list=[files_noise]
+labels = ['figures/execute_noise.pdf']
 for file, label in zip(file_paths_list, labels):
     create_single_plot_for_file_paths(file, label)

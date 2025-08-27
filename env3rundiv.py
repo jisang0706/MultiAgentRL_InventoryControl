@@ -7,7 +7,7 @@ from gymnasium.spaces import Dict, Box
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from ray.rllib.env.wrappers.multi_agent_env_compatibility import MultiAgentEnvCompatibility
+#from ray.rllib.env.wrappers.multi_agent_env_compatibility import MultiAgentEnvCompatibility
 from scipy.stats import poisson, randint
 """
 This environment is for a multi echelon supply chain 
