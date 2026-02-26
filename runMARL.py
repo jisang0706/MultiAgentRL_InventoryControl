@@ -7,7 +7,6 @@ from ray.rllib.models import ModelCatalog
 import ray 
 from ray import tune 
 from ray import air
-from ray.rllib.algorithms.qmix import QMixConfig
 from ray.tune.logger import pretty_print
 import os 
 from ray.rllib.utils.test_utils import check_learning_achieved
