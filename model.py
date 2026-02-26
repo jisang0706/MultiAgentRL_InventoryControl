@@ -29,6 +29,7 @@ class GNNLayer(nn.Module):
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
+        edge_index = edge_index.to(x.device).long()
         x = self.conv1(x, edge_index)
         x = torch.relu(x) 
         x = self.conv3(x, edge_index)
@@ -69,6 +70,7 @@ class GNNActorCriticModel(TorchModelV2, nn.Module):
     def forward(self, input_dict, state, seq_lens):
         
         self._model_in = [input_dict["obs_flat"], state, seq_lens]
+        device = input_dict["obs"]["own_obs"].device
         
         connections = {0: [1,2], 1:[3,4], 2:[4, 5], 3:[], 4:[], 5:[]}
         num_nodes = max(connections.keys()) +1
@@ -80,7 +82,7 @@ class GNNActorCriticModel(TorchModelV2, nn.Module):
 
         adjacency_matrix = network
         # Convert it to a PyTorch tensor
-        adj_t = torch.tensor(adjacency_matrix)
+        adj_t = torch.tensor(adjacency_matrix, device=device)
 
         edge_index_single = adj_t.nonzero(as_tuple=False).t().contiguous()
 
@@ -88,7 +90,7 @@ class GNNActorCriticModel(TorchModelV2, nn.Module):
         if input_dict["obs"]["own_obs"].shape[0] == 32:
             batch_edge_index = torch.cat([edge_index_single] * 32, dim=1)
 
-        x = torch.cat((input_dict["obs"]["own_obs"], input_dict["obs"]["opponent_obs"]), dim=1)
+        x = torch.cat((input_dict["obs"]["own_obs"], input_dict["obs"]["opponent_obs"]), dim=1).float()
 
         if input_dict["obs"]["own_obs"].shape[0] == 32:
             x = x.view(32, num_nodes, 10)
@@ -97,10 +99,10 @@ class GNNActorCriticModel(TorchModelV2, nn.Module):
             x = x.view(dim, num_nodes, 10)
 
         if input_dict["obs"]["own_obs"].shape[0] == 32:
-            data = Data (x = x, edge_index=batch_edge_index)
+            data = Data (x = x, edge_index=batch_edge_index.to(device).long())
             #print("batch edge index", batch_edge_index, batch_edge_index.shape)
         else:
-            data = Data(x = x, edge_index = edge_index_single)
+            data = Data(x = x, edge_index = edge_index_single.to(device).long())
             #print("edge_index single",edge_index_single, edge_index_single.shape)
 
         # GNN-based message generation
