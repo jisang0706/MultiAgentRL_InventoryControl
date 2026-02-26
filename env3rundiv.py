@@ -621,9 +621,13 @@ class MultiAgentInvManagementDiv(MultiAgentEnv):
         total_backlog = sum(node_info['backlog'] for node_info in infos.values())
         total_inventory = sum(node_info['inventory'] for node_info in infos.values())
         
-        infos['total_backlog'] = total_backlog
-        infos['overall_profit'] = total_profit
-        infos['total_inventory'] = total_inventory
+        # RLlib expects infos keys to match agent IDs, with optional '__common__'
+        # for global episode-level metrics.
+        infos['__common__'] = {
+            'total_backlog': total_backlog,
+            'overall_profit': total_profit,
+            'total_inventory': total_inventory,
+        }
 
         truncated = {}
         for node_id in self.node_names:

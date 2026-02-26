@@ -131,9 +131,10 @@ def run_simulation(num_periods_, trained_policy, env, model_config):
 
         obs, rewards, done, truncated, infos = env.step(actions)
         all_infos.append(infos)
-        all_profits.append(infos['overall_profit'])
-        all_backlog.append(infos['total_backlog'])
-        all_inv.append(infos['total_inventory'])
+        common_info = infos.get('__common__', infos)
+        all_profits.append(common_info['overall_profit'])
+        all_backlog.append(common_info['total_backlog'])
+        all_inv.append(common_info['total_inventory'])
 
         _ +=1
     
