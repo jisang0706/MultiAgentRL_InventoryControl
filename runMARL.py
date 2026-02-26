@@ -2,20 +2,44 @@
 from env3rundiv import MultiAgentInvManagementDiv
 import gymnasium as gym
 from gymnasium.spaces import Dict, Box
-import numpy as np 
+import numpy as np
+import argparse
 from ray.rllib.models import ModelCatalog
-import ray 
-from ray import tune 
+import ray
+from ray import tune
 from ray import air
 from ray.tune.logger import pretty_print
-import os 
+import os
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.policy.policy import Policy
-import time 
+import time
 from ray.rllib.algorithms.ppo import PPOConfig
-import json 
+import json
 from ray.rllib.policy.policy import PolicySpec #For policy mapping
 from ccmodel import CentralisedCriticModel, FillInActions
+from checkpoint_backup import CheckpointBackupManager
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--iterations", type=int, default=60, help="Number of training iterations.")
+parser.add_argument(
+    "--backup-dir",
+    type=str,
+    default="",
+    help="Optional directory to copy checkpoints during training.",
+)
+parser.add_argument(
+    "--backup-every",
+    type=int,
+    default=5,
+    help="Copy checkpoint to --backup-dir every N iterations.",
+)
+parser.add_argument(
+    "--restore-checkpoint",
+    type=str,
+    default="",
+    help="Optional checkpoint path to restore before training.",
+)
+args, _ = parser.parse_known_args()
 
 config = {"connections": {0: [1,2], 1:[3,4], 2:[4, 5], 3:[], 4:[], 5:[]}, 
           #"num_products":2, 
@@ -185,14 +209,23 @@ algo_w_5_policies = (
     )
     .build()
 )
-iterations = 60
+
+if args.restore_checkpoint:
+    algo_w_5_policies.restore(args.restore_checkpoint)
+    print(f"[restore] loaded checkpoint: {args.restore_checkpoint}")
+
+iterations = args.iterations
+path_to_checkpoint = None
+backup_manager = CheckpointBackupManager(args.backup_dir, args.backup_every)
 for i in range(iterations):
     algo_w_5_policies.train()
-    path_to_checkpoint = algo_w_5_policies.save()
+    save_result = algo_w_5_policies.save()
+    path_to_checkpoint = backup_manager.process_save_result(save_result, i + 1)
     print(
                 "An Algorithm checkpoint has been created inside directory: "
-                f"'{path_to_checkpoint}'. It should contain 5 policies in the 'policies/' sub dir."
+                f"'{path_to_checkpoint}'. It should contain {num_agents} policies in the 'policies/' sub dir."
             )
+backup_manager.finalize(path_to_checkpoint, iterations)
 
 # Let's terminate the algo for demonstration purposes.
 
