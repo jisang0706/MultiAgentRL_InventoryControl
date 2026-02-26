@@ -3,6 +3,7 @@ import gymnasium as gym
 from gymnasium.spaces import Dict, Box, Discrete
 import numpy as np
 import argparse
+import torch
 from ray.rllib.models import ModelCatalog
 import ray
 from ray import tune
@@ -52,6 +53,8 @@ ModelCatalog.register_custom_model("gnn_model", GNNActorCriticModel)
 #from ray.rllib.algorithms.maddpg.maddpg import MADDPGConfig
 ray.shutdown()
 ray.init()
+num_gpus_for_trainer = 1 if torch.cuda.is_available() else 0
+print(f"[device] torch.cuda.is_available={torch.cuda.is_available()} -> RLlib num_gpus={num_gpus_for_trainer}")
 
 
 config = {"connections": {0: [1,2], 1:[3,4], 2:[4, 5], 3:[], 4:[], 5:[]}, 
@@ -176,6 +179,7 @@ algo_w_5_policies = (
             "num_agents": num_agents,
         },
     )
+    .resources(num_gpus=num_gpus_for_trainer)
     .rollouts(
         batch_mode="complete_episodes",
             num_rollout_workers=0,
