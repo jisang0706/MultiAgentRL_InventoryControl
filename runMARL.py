@@ -157,6 +157,8 @@ algo_w_5_policies = (
     .environment(
         env= "MultiAgentInvManagementDiv",
         env_config={
+            "connections": config["connections"],
+            "num_nodes": num_nodes,
             "num_agents": num_agents,
         },
     )
